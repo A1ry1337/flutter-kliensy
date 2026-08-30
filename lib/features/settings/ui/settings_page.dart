@@ -16,99 +16,95 @@ class SettingsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.sizeOf(context).width < 768;
 
-    return AppShell(
-      activeTab: AppTab.settings,
-      authController: authController,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (!isMobile)
-            PageHeader(
-              title: 'Настройки',
-              breadcrumbs: [
-                Breadcrumb(label: 'Настройки', onTap: null),
-              ],
-            )
-          else
-            Container(
-              color: Colors.white,
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 16, vertical: 14),
-              child: const Text(
-                'Настройки',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w700,
-                  color: Color(0xFF1A1D2E),
-                ),
-              ),
-            ),
-          const Divider(height: 1),
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _SettingsSection(
-                    title: 'Профиль',
-                    children: [
-                      _SettingsTile(
-                        icon: Icons.person_outline_rounded,
-                        title: 'Личные данные',
-                        subtitle: 'Имя, email, телефон',
-                        onTap: () {},
-                      ),
-                      _SettingsTile(
-                        icon: Icons.lock_outline_rounded,
-                        title: 'Безопасность',
-                        subtitle: 'Пароль и сессии',
-                        onTap: () {},
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  _SettingsSection(
-                    title: 'Уведомления',
-                    children: [
-                      _SettingsTile(
-                        icon: Icons.notifications_none_rounded,
-                        title: 'Push-уведомления',
-                        subtitle: 'Новые заявки и изменения',
-                        onTap: () {},
-                        trailing: Switch(
-                          value: true,
-                          onChanged: (_) {},
-                          activeColor: const Color(0xFF1A5BFF),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  _SettingsSection(
-                    title: 'Приложение',
-                    children: [
-                      _SettingsTile(
-                        icon: Icons.info_outline_rounded,
-                        title: 'О приложении',
-                        subtitle: 'Версия 1.0.0',
-                        onTap: () {},
-                      ),
-                      _SettingsTile(
-                        icon: Icons.logout_rounded,
-                        title: 'Выйти',
-                        subtitle: 'Завершить текущую сессию',
-                        titleColor: Colors.red,
-                        onTap: () => authController.logout(),
-                      ),
-                    ],
-                  ),
-                ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (!isMobile)
+          PageHeader(
+            title: 'Настройки',
+            breadcrumbs: [
+              Breadcrumb(label: 'Настройки', onTap: null),
+            ],
+          )
+        else
+          Container(
+            color: Colors.white,
+            padding: const EdgeInsets.symmetric(
+                horizontal: 16, vertical: 14),
+            child: const Text(
+              'Настройки',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF1A1D2E),
               ),
             ),
           ),
-        ],
-      ),
+        const Divider(height: 1),
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _SettingsSection(
+                  title: 'Профиль',
+                  children: [
+                    _SettingsTile(
+                      icon: Icons.person_outline_rounded,
+                      title: 'Личные данные',
+                      subtitle: 'Имя, email, телефон',
+                      onTap: () {},
+                    ),
+                    _SettingsTile(
+                      icon: Icons.lock_outline_rounded,
+                      title: 'Безопасность',
+                      subtitle: 'Пароль и сессии',
+                      onTap: () {},
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                _SettingsSection(
+                  title: 'Уведомления',
+                  children: [
+                    _SettingsTile(
+                      icon: Icons.notifications_none_rounded,
+                      title: 'Push-уведомления',
+                      subtitle: 'Новые заявки и изменения',
+                      onTap: () {},
+                      trailing: Switch(
+                        value: true,
+                        onChanged: (_) {},
+                        activeColor: const Color(0xFF1A5BFF),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                _SettingsSection(
+                  title: 'Приложение',
+                  children: [
+                    _SettingsTile(
+                      icon: Icons.info_outline_rounded,
+                      title: 'О приложении',
+                      subtitle: 'Версия 1.0.0',
+                      onTap: () {},
+                    ),
+                    _SettingsTile(
+                      icon: Icons.logout_rounded,
+                      title: 'Выйти',
+                      subtitle: 'Завершить текущую сессию',
+                      titleColor: Colors.red,
+                      onTap: () => authController.logout(),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

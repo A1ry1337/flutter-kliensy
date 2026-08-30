@@ -12,15 +12,10 @@ import 'package:kliensy/features/requests/state/requests_controller.dart';
 import 'package:kliensy/features/requests/ui/%20request_detail_page.dart';
 import 'package:kliensy/features/requests/ui/requests_page.dart';
 import 'package:kliensy/features/settings/ui/settings_page.dart';
-
+import 'package:kliensy/shared/ui/app_shell.dart';
 
 import 'app_routes.dart';
 
-/// Фабрика роутера.
-///
-/// Принимает зависимости явно — никакого глобального состояния.
-/// При смене [AuthStatus] go_router сам пересчитывает редиректы через
-/// [GoRouter.refreshListenable].
 GoRouter createRouter({
   required AuthController authController,
   required UserApi userApi,
@@ -64,70 +59,99 @@ GoRouter createRouter({
         ),
       ),
 
-      // ── Requests ─────────────────────────────────────────────────────────
-      GoRoute(
-        path: AppRoutes.requests,
-        builder: (_, __) => RequestsPage(
-          requestsController: requestsController,
-          authController: authController,
-        ),
-      ),
-      GoRoute(
-        path: AppRoutes.requestDetail,
-        builder: (_, state) {
-          final id = int.tryParse(state.pathParameters['id'] ?? '');
+      // ── Main app shell ───────────────────────────────────────────────────
+      ShellRoute(
+        builder: (context, state, child) {
+          final location = state.matchedLocation;
 
-          if (id == null) {
-            return const _RouterErrorPage(
-              error: AppException('Некорректный ID заявки'),
-            );
-          }
+          final activeTab = location.startsWith(AppRoutes.clients)
+              ? AppTab.clients
+              : location.startsWith(AppRoutes.settings)
+              ? AppTab.settings
+              : AppTab.requests;
 
-          return RequestDetailPage(
-            requestId: id,
-            requestsController: requestsController,
+          return AppShell(
+            activeTab: activeTab,
             authController: authController,
+            child: child,
           );
         },
-      ),
+        routes: [
+          // ── Requests ─────────────────────────────────────────────────────
+          GoRoute(
+            path: AppRoutes.requests,
+            pageBuilder: (_, __) => NoTransitionPage(
+              child: RequestsPage(
+                requestsController: requestsController,
+              ),
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.requestDetail,
+            pageBuilder: (_, state) {
+              final id = int.tryParse(state.pathParameters['id'] ?? '');
 
-      // ── Clients ──────────────────────────────────────────────────────────
-      GoRoute(
-        path: AppRoutes.clients,
-        builder: (_, __) => ClientsPage(
-          clientsController: clientsController,
-          authController: authController,
-        ),
-      ),
-      GoRoute(
-        path: AppRoutes.clientDetail,
-        builder: (_, state) {
-          final id = int.tryParse(state.pathParameters['id'] ?? '');
+              if (id == null) {
+                return const NoTransitionPage(
+                  child: _RouterErrorPage(
+                    error: AppException('Некорректный ID заявки'),
+                  ),
+                );
+              }
 
-          if (id == null) {
-            return const _RouterErrorPage(
-              error: AppException('Некорректный ID клиента'),
-            );
-          }
+              return NoTransitionPage(
+                child: RequestDetailPage(
+                  requestId: id,
+                  requestsController: requestsController,
+                  authController: authController,
+                ),
+              );
+            },
+          ),
 
-          return ClientDetailPage(
-            clientId: id,
-            clientsController: clientsController,
-            requestsController: requestsController,
-            authController: authController,
-          );
-        },
-      ),
+          // ── Clients ──────────────────────────────────────────────────────
+          GoRoute(
+            path: AppRoutes.clients,
+            pageBuilder: (_, __) => NoTransitionPage(
+              child: ClientsPage(
+                clientsController: clientsController,
+              ),
+            ),
+          ),
+          GoRoute(
+            path: AppRoutes.clientDetail,
+            pageBuilder: (_, state) {
+              final id = int.tryParse(state.pathParameters['id'] ?? '');
 
-      // ── Settings ─────────────────────────────────────────────────────────
-      GoRoute(
-        path: AppRoutes.settings,
-        builder: (_, __) => SettingsPage(
-          authController: authController,
-        ),
+              if (id == null) {
+                return const NoTransitionPage(
+                  child: _RouterErrorPage(
+                    error: AppException('Некорректный ID клиента'),
+                  ),
+                );
+              }
+
+              return NoTransitionPage(
+                child: ClientDetailPage(
+                  clientId: id,
+                  clientsController: clientsController,
+                  requestsController: requestsController,
+                  authController: authController,
+                ),
+              );
+            },
+          ),
+
+          // ── Settings ─────────────────────────────────────────────────────
+          GoRoute(
+            path: AppRoutes.settings,
+            pageBuilder: (_, __) => NoTransitionPage(
+              child: SettingsPage(authController: authController),
+            ),
+          ),
+        ],
       ),
     ],
-
     errorBuilder: (_, state) => _RouterErrorPage(error: state.error),
   );
 }
@@ -138,12 +162,10 @@ GoRouterRedirect _authGuard(AuthController authController) {
     final status = authController.status;
     final location = state.matchedLocation;
 
-    // 1. Пока checking → всегда splash
     if (status == AuthStatus.checking) {
       return location == AppRoutes.splash ? null : AppRoutes.splash;
     }
 
-    // 2. После проверки — уходим со splash
     if (location == AppRoutes.splash) {
       return status == AuthStatus.authenticated
           ? AppRoutes.requests
@@ -153,12 +175,10 @@ GoRouterRedirect _authGuard(AuthController authController) {
     final isOnAuthPage =
         location == AppRoutes.login || location == AppRoutes.register;
 
-    // 3. Не авторизован → только login/register
     if (status == AuthStatus.unauthenticated && !isOnAuthPage) {
       return AppRoutes.login;
     }
 
-    // 4. Авторизован → не пускаем на login/register
     if (status == AuthStatus.authenticated && isOnAuthPage) {
       return AppRoutes.requests;
     }
@@ -166,8 +186,6 @@ GoRouterRedirect _authGuard(AuthController authController) {
     return null;
   };
 }
-
-// ── Вспомогательные виджеты роутера ─────────────────────────────────────────
 
 class _SplashPage extends StatelessWidget {
   const _SplashPage();

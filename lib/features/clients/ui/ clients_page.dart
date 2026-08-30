@@ -14,11 +14,9 @@ class ClientsPage extends StatefulWidget {
   const ClientsPage({
     super.key,
     required this.clientsController,
-    required this.authController,
   });
 
   final ClientsController clientsController;
-  final AuthController authController;
 
   @override
   State<ClientsPage> createState() => _ClientsPageState();
@@ -65,36 +63,32 @@ class _ClientsPageState extends State<ClientsPage> {
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.sizeOf(context).width < 768;
 
-    return AppShell(
-      activeTab: AppTab.clients,
-      authController: widget.authController,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (!isMobile)
-            PageHeader(
-              title: 'Клиенты',
-              searchHint: 'Поиск по имени или телефону',
-              actionLabel: '+ Новый клиент',
-              onAction: _openNewClient,
-              searchController: _searchController,
-              onSearch: _cc.setSearch,
-            )
-          else
-            _MobileHeader(onSearch: () {}, onAdd: _openNewClient),
-          const Divider(height: 1),
-          Expanded(
-            child: AnimatedBuilder(
-              animation: _cc,
-              builder: (_, __) => _Body(
-                controller: _cc,
-                scrollController: _scrollController,
-                isMobile: isMobile,
-              ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (!isMobile)
+          PageHeader(
+            title: 'Клиенты',
+            searchHint: 'Поиск по имени или телефону',
+            actionLabel: '+ Новый клиент',
+            onAction: _openNewClient,
+            searchController: _searchController,
+            onSearch: _cc.setSearch,
+          )
+        else
+          _MobileHeader(onSearch: () {}, onAdd: _openNewClient),
+        const Divider(height: 1),
+        Expanded(
+          child: AnimatedBuilder(
+            animation: _cc,
+            builder: (_, __) => _Body(
+              controller: _cc,
+              scrollController: _scrollController,
+              isMobile: isMobile,
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
